@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Error Tracker SDK Demo</title>
+  <style>
+    body { font-family: system-ui; max-width: 640px; margin: 40px auto; padding: 0 16px; background: #f4f1ec; color: #1a1a1a; }
+    .panel { background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #ddd; }
+    h1 { color: #0B3D2E; margin-top: 0; }
+    button { margin: 4px 8px 4px 0; padding: 8px 14px; cursor: pointer; border-radius: 6px; border: 1px solid #0B3D2E; background: #0B3D2E; color: #fff; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    button.secondary { background: #fff; color: #0B3D2E; }
+    pre { background: #111; color: #eee; padding: 12px; border-radius: 6px; overflow: auto; max-height: 280px; font-size: 12px; }
+    input { width: 100%; padding: 8px; margin: 4px 0 12px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+    label { font-size: 13px; color: #555; }
+    #preview { max-width: 100%; border: 1px solid #ccc; border-radius: 6px; margin-top: 8px; display: none; background: #111; }
+    .hint { font-size: 13px; color: #666; }
+    .card { background: #E8F2EE; padding: 12px; border-radius: 6px; margin: 12px 0; border: 1px solid #b7d4c8; }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <h1>Error Tracker SDK Demo</h1>
+    <p class="hint">Paste keys from <code>npm run seed</code>. Errors capture a viewport screenshot (DOM paint — no tainted canvas).</p>
+
+    <div class="card">
+      <strong>Sample UI</strong>
+      <p>Checkout total: $49.00 · User: demo@example.com</p>
+    </div>
+
+    <label>DSN</label>
+    <input id="dsn" value="http://localhost:5050/api/v1/errors" />
+    <label>Project Key</label>
+    <input id="projectKey" placeholder="pub_..." />
+    <label>Secret Key</label>
+    <input id="secretKey" placeholder="sec_..." />
+
+    <button id="init">Init SDK</button>
+    <button id="throw" class="secondary" disabled>Throw Error + Screenshot</button>
+    <button id="message" class="secondary" disabled>Capture Message</button>
+
+    <h3>Screenshot preview</h3>
+    <img id="preview" alt="screenshot preview" />
+
+    <h3>Log</h3>
+    <pre id="log"></pre>
+  </div>
+
+  <script type="module">
+    const logEl = document.getElementById('log');
+    const preview = document.getElementById('preview');
+    const log = (m) => { logEl.textContent += m + '\n'; logEl.scrollTop = logEl.scrollHeight; };
+
+    let config = null;
+    let breadcrumbs = [];
+    let sessionId = 'sess_' + Math.random().toString(36).slice(2);
+
+    /** Safe DOM-paint screenshot — never uses SVG foreignObject (avoids tainted canvas). */
+    async function captureScreenshot() {
+      const viewportW = window.innerWidth;
+      const viewportH = window.innerHeight;
+      const scale = Math.min(1, 1280 / viewportW, 720 / viewportH);
+      const width = Math.floor(viewportW * scale);
+      const height = Math.floor(viewportH * scale);
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      const bodyBg = getComputedStyle(document.body).backgroundColor || '#ffffff';
+      ctx.fillStyle = bodyBg;
+      ctx.fillRect(0, 0, width, height);
+      ctx.scale(scale, scale);
+
+      const els = Array.from(document.body.querySelectorAll('*'));
+      for (const el of els) {
+        const style = getComputedStyle(el);
+        if (style.display === 'none' || style.visibility === 'hidden') continue;
+        const rect = el.getBoundingClientRect();
+        if (rect.width < 1 || rect.height < 1) continue;
+        if (rect.bottom < 0 || rect.top > viewportH || rect.right < 0 || rect.left > viewportW) continue;
+
+        const bg = style.backgroundColor;
+        if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
+          ctx.fillStyle = bg;
+          ctx.fillRect(rect.left, rect.top, rect.width, rect.height);
+        }
+
+        let text = '';
+        for (const child of el.childNodes) {
+          if (child.nodeType === Node.TEXT_NODE) text += child.textContent || '';
+        }
+        text = text.replace(/\s+/g, ' ').trim();
+        if (!text && ['H1', 'H2', 'H3', 'P', 'BUTTON', 'LABEL', 'STRONG'].includes(el.tagName)) {
+          text = (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 120);
+        }
+        if (text) {
+          const fontSize = Math.max(10, parseFloat(style.fontSize) || 14);
+          ctx.fillStyle = style.color || '#1a1a1a';
+          ctx.font = `${style.fontWeight || 400} ${fontSize}px ${style.fontFamily || 'sans-serif'}`;
+          ctx.textBaseline = 'top';
+          ctx.fillText(text.slice(0, 100), rect.left + 4, rect.top + 4);
+        }
+      }
+
+      // Info bar
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.fillStyle = 'rgba(11, 61, 46, 0.92)';
+      ctx.fillRect(0, 0, width, 32);
+      ctx.fillStyle = '#fff';
+      ctx.font = '12px sans-serif';
+      ctx.fillText(document.title + ' — ' + location.href, 8, 20);
+
+      return {
+        data: canvas.toDataURL('image/jpeg', 0.6),
+        contentType: 'image/jpeg',
+        width,
+        height,
+        capturedAt: new Date().toISOString(),
+      };
+    }
+
+    async function send(event) {
+      const res = await fetch(config.dsn, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Project-Key': config.projectKey,
+          'X-Secret-Key': config.secretKey,
+        },
+        body: JSON.stringify(event),
+      });
+      const body = await res.json();
+      log(JSON.stringify(body, null, 2));
+      return body;
+    }
+
+    document.getElementById('init').onclick = () => {
+      config = {
+        dsn: document.getElementById('dsn').value.trim(),
+        projectKey: document.getElementById('projectKey').value.trim(),
+        secretKey: document.getElementById('secretKey').value.trim(),
+      };
+      if (!config.projectKey || !config.secretKey) {
+        log('ERROR: project key and secret key are required');
+        return;
+      }
+      ['throw', 'message'].forEach((id) => {
+        document.getElementById(id).disabled = false;
+      });
+      log('SDK initialized (safe screenshot capture enabled)');
+    };
+
+    document.getElementById('throw').onclick = async () => {
+      breadcrumbs.push({
+        timestamp: new Date().toISOString(),
+        category: 'ui',
+        message: 'Clicked Throw Error',
+        level: 'info',
+      });
+
+      let screenshot;
+      try {
+        log('Capturing screenshot…');
+        screenshot = await captureScreenshot();
+        preview.src = screenshot.data;
+        preview.style.display = 'block';
+        log(`Screenshot OK ${screenshot.width}x${screenshot.height} (~${Math.round(screenshot.data.length / 1024)}KB)`);
+      } catch (err) {
+        log('Screenshot failed (sending error without it): ' + (err && err.message ? err.message : err));
+        screenshot = undefined;
+      }
+
+      const err = new Error('Demo TypeError: Cannot read property foo of undefined');
+      err.name = 'TypeError';
+
+      try {
+        await send({
+          message: err.message,
+          errorType: err.name,
+          severity: 'high',
+          stackTrace: err.stack,
+          environment: 'development',
+          version: '1.0.0-demo',
+          url: location.href,
+          browser: { name: 'Demo', version: '1', userAgent: navigator.userAgent },
+          device: { type: 'desktop', os: 'macOS' },
+          sessionId,
+          breadcrumbs,
+          user: { id: 'demo-user', email: 'demo@example.com' },
+          context: { customData: { source: 'browser-demo' }, tags: ['demo', 'screenshot'] },
+          ...(screenshot ? { screenshot } : {}),
+        });
+      } catch (sendErr) {
+        log('Send failed: ' + (sendErr && sendErr.message ? sendErr.message : sendErr));
+        log('Is the API running on ' + config.dsn + ' ?');
+      }
+    };
+
+    document.getElementById('message').onclick = async () => {
+      try {
+        await send({
+          message: 'Demo warning message from browser',
+          errorType: 'CaptureMessage',
+          severity: 'low',
+          stackTrace: '',
+          environment: 'development',
+          version: '1.0.0-demo',
+          url: location.href,
+          browser: { name: 'Demo', version: '1', userAgent: navigator.userAgent },
+          device: { type: 'desktop', os: 'macOS' },
+          sessionId,
+          breadcrumbs,
+        });
+      } catch (sendErr) {
+        log('Send failed: ' + (sendErr && sendErr.message ? sendErr.message : sendErr));
+      }
+    };
+  </script>
+</body>
+</html>

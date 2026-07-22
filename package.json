@@ -1,0 +1,23 @@
+{
+  "name": "error-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Error Tracking & Project Monitoring SDK System",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=@error-tracker/api & npm run dev --workspace=@error-tracker/admin",
+    "dev:api": "npm run dev --workspace=@error-tracker/api",
+    "dev:admin": "npm run dev --workspace=@error-tracker/admin",
+    "build": "npm run build --workspaces --if-present",
+    "build:sdk": "npm run build --workspace=@error-tracker/js-sdk && npm run build --workspace=@error-tracker/react",
+    "build:api": "npm run build --workspace=@error-tracker/api",
+    "seed": "npm run seed --workspace=@error-tracker/api",
+    "lint": "npm run lint --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
