@@ -5,7 +5,7 @@ import react from '@vitejs/plugin-react'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-// Local @error-tracker/react lives under packages/ and would otherwise resolve
+// Local @isaiiai/error-trackers-react lives under packages/ and would otherwise resolve
 // React from the monorepo root (v18) while this app uses v19 — causing
 // "Cannot read properties of null (reading 'useRef')".
 export default defineConfig({

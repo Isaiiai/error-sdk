@@ -1,5 +1,5 @@
 import React, { useEffect, useState, type CSSProperties } from 'react';
-import type { MaintenanceStatus } from '@error-tracker/js-sdk';
+import type { MaintenanceStatus } from '@isaiiai/error-trackers-js-sdk';
 
 export interface MaintenanceScreenProps {
   status: MaintenanceStatus;

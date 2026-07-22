@@ -8,8 +8,8 @@ End-to-end error tracking and project monitoring platform (TypeScript), based on
 |---------|-------------|
 | `apps/api` | Express + MongoDB API (`/api/v1`) |
 | `apps/admin` | React admin dashboard (MUI + Redux + React Query) |
-| `packages/sdk` | Browser TypeScript SDK (`@error-tracker/js-sdk`) |
-| `packages/react` | React ErrorBoundary + hooks (`@error-tracker/react`) |
+| `packages/sdk` | Browser TypeScript SDK (`@isaiiai/error-trackers-js-sdk`) |
+| `packages/react` | React ErrorBoundary + hooks (`@isaiiai/error-trackers-react`) |
 
 ## Quick start
 

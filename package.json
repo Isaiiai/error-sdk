@@ -12,7 +12,7 @@
     "dev:api": "npm run dev --workspace=@error-tracker/api",
     "dev:admin": "npm run dev --workspace=@error-tracker/admin",
     "build": "npm run build --workspaces --if-present",
-    "build:sdk": "npm run build --workspace=@error-tracker/js-sdk && npm run build --workspace=@error-tracker/react",
+    "build:sdk": "npm run build --workspace=@isaiiai/error-trackers-js-sdk && npm run build --workspace=@isaiiai/error-trackers-react",
     "build:api": "npm run build --workspace=@error-tracker/api",
     "seed": "npm run seed --workspace=@error-tracker/api",
     "lint": "npm run lint --workspaces --if-present"

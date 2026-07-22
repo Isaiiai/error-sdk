@@ -1,7 +1,18 @@
 {
-  "name": "@error-tracker/js-sdk",
-  "version": "1.0.0",
-  "description": "Browser TypeScript SDK for Error Tracker",
+  "name": "@isaiiai/error-trackers-js-sdk",
+  "version": "1.0.1",
+  "description": "Browser TypeScript SDK for Isaii Error Tracker — capture errors, network, page views, support tickets, and maintenance status.",
+  "license": "MIT",
+  "author": "Isaii AI",
+  "homepage": "https://isaii.in",
+  "keywords": [
+    "error-tracking",
+    "monitoring",
+    "sdk",
+    "browser",
+    "typescript",
+    "isaii"
+  ],
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -12,11 +23,18 @@
       "require": "./dist/index.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts --clean",
     "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
     "tsup": "^8.2.4",

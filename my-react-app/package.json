@@ -10,8 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@error-tracker/js-sdk": "file:../packages/sdk",
-    "@error-tracker/react": "file:../packages/react",
+    "@isaiiai/error-trackers-js-sdk": "file:../packages/sdk",
+    "@isaiiai/error-trackers-react": "file:../packages/react",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-router-dom": "^7.18.1"

@@ -7,8 +7,8 @@ import React, {
   type CSSProperties,
   type ReactNode,
 } from 'react';
-import type ErrorTracker from '@error-tracker/js-sdk';
-import type { MaintenanceStatus } from '@error-tracker/js-sdk';
+import type ErrorTracker from '@isaiiai/error-trackers-js-sdk';
+import type { MaintenanceStatus } from '@isaiiai/error-trackers-js-sdk';
 import { ErrorTrackerContext } from './context';
 import { SdkLoadingFallback } from './LoadingFallback';
 

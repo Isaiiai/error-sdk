@@ -1,4 +1,4 @@
-import ErrorTracker from '@error-tracker/js-sdk'
+import ErrorTracker from '@isaiiai/error-trackers-js-sdk'
 
 const projectKey = import.meta.env.VITE_ERROR_PROJECT_KEY
 const secretKey = import.meta.env.VITE_ERROR_SECRET_KEY

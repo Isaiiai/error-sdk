@@ -7,8 +7,8 @@ import React, {
   type ErrorInfo,
   type ReactNode,
 } from 'react';
-import type ErrorTracker from '@error-tracker/js-sdk';
-import type { SupportRequestInput } from '@error-tracker/js-sdk';
+import type ErrorTracker from '@isaiiai/error-trackers-js-sdk';
+import type { SupportRequestInput } from '@isaiiai/error-trackers-js-sdk';
 import { ErrorTrackerContext } from './context';
 import { SupportPage, type SupportPageProps, type SupportCategory } from './SupportPage';
 import { MaintenancePage, type MaintenancePageProps } from './MaintenancePage';

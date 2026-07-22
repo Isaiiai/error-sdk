@@ -7,14 +7,14 @@ import {
   SupportWidget,
   MaintenancePage,
   SdkLoadingFallback,
-} from '@error-tracker/react'
+} from '@isaiiai/error-trackers-react'
 import './index.css'
 import App from './App.jsx'
 import { tracker } from './errorTracker.js'
 
 // Support UI is a separate chunk — only fetched when /support is visited.
 const SupportPage = lazy(() =>
-  import('@error-tracker/react/support').then((m) => ({ default: m.SupportPage }))
+  import('@isaiiai/error-trackers-react/support').then((m) => ({ default: m.SupportPage }))
 )
 
 createRoot(document.getElementById('root')).render(

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useErrorTracker } from '@error-tracker/react'
+import { useErrorTracker } from '@isaiiai/error-trackers-react'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
@@ -123,10 +123,10 @@ function App() {
           <p>Installed from local monorepo packages</p>
           <ul>
             <li>
-              <span>@error-tracker/js-sdk</span>
+              <span>@isaiiai/error-trackers-js-sdk</span>
             </li>
             <li>
-              <span>@error-tracker/react</span>
+              <span>@isaiiai/error-trackers-react</span>
             </li>
           </ul>
         </div>
