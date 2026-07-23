@@ -25,14 +25,18 @@ async function bootstrap() {
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
   app.use(
     cors({
-      // Reflect request origin so browser SDK + file:// demos work with credentials
       origin: (origin, callback) => {
         if (!origin || config.isDev) {
           return callback(null, true);
         }
-        const allowed = [config.corsOrigin, 'http://localhost:3000', 'http://127.0.0.1:3000'];
+        const allowed = [
+          ...config.corsOrigin.split(',').map((s) => s.trim()).filter(Boolean),
+          'https://app.traceops.isaii.in',
+          'http://localhost:3000',
+          'http://127.0.0.1:3000',
+        ];
         if (allowed.includes(origin)) return callback(null, true);
-        return callback(null, config.isDev);
+        return callback(new Error(`CORS blocked for origin: ${origin}`));
       },
       credentials: true,
     })

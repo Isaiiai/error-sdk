@@ -24,7 +24,9 @@ export const config = {
     process.env.CREDENTIALS_ENCRYPTION_KEY ||
     process.env.JWT_SECRET ||
     'dev-credentials-encryption-key-32b',
-  corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  corsOrigin: process.env.CORS_ORIGIN || 'https://app.traceops.isaii.in',
+  appUrl: process.env.APP_URL || 'https://app.traceops.isaii.in',
+  apiUrl: process.env.API_URL || 'https://api.traceops.isaii.in',
   isDev: (process.env.NODE_ENV || 'development') === 'development',
   spaces: {
     url: trimEnv(process.env.DO_SPACES_URL),
