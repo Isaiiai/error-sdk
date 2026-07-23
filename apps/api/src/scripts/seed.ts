@@ -9,6 +9,7 @@ import { generateApiKey, hashKey, computeFingerprint } from '../utils/crypto';
 
 async function seed() {
   await mongoose.connect(config.mongodbUri);
+  console.log(config.mongodbUri);
   console.log('Connected to MongoDB');
 
   await Promise.all([

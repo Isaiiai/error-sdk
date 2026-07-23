@@ -19,14 +19,5 @@ COPY --from=builder /app/apps/api/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY .env .env
 
-# TraceOps production (HTTPS)
-ENV NODE_ENV=production
-ENV PORT=4000
-ENV CORS_ORIGIN=https://app.traceops.isaii.in
-ENV APP_URL=https://app.traceops.isaii.in
-ENV API_URL=https://api.traceops.isaii.in
-ENV MONGODB_URI=mongodb://traceops-mongo:27017/error-trackers-db
-ENV REDIS_URL=redis://traceops-redis:6379
-
 EXPOSE 4000
-CMD ["node", "dist/server.js"]
+CMD ["node", "dist/server.js"  ]

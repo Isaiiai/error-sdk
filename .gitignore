@@ -10,3 +10,4 @@ apps/admin/dist/
 packages/*/dist/
 apps/api/dist/
 .data/
+config.bat
