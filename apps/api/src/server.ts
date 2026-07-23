@@ -17,30 +17,14 @@ async function bootstrap() {
   const app = express();
   const httpServer = createServer(app);
   const io = new SocketServer(httpServer, {
-    cors: { origin: config.corsOrigin, credentials: true },
+    cors: { origin: true, credentials: true },
   });
 
   app.set('io', io);
 
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
-  app.use(
-    cors({
-      origin: (origin, callback) => {
-        if (!origin || config.isDev) {
-          return callback(null, true);
-        }
-        const allowed = [
-          ...config.corsOrigin.split(',').map((s) => s.trim()).filter(Boolean),
-          'https://app.traceops.isaii.in',
-          'http://localhost:3000',
-          'http://127.0.0.1:3000',
-        ];
-        if (allowed.includes(origin)) return callback(null, true);
-        return callback(new Error(`CORS blocked for origin: ${origin}`));
-      },
-      credentials: true,
-    })
-  );
+  // Reflect request origin — browser SDK can post from any customer site
+  app.use(cors({ origin: true, credentials: true }));
   app.use(express.json({ limit: '16mb' }));
   app.use(morgan(config.isDev ? 'dev' : 'combined'));
 
