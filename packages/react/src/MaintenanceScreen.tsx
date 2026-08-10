@@ -9,27 +9,6 @@ export interface MaintenanceScreenProps {
   style?: CSSProperties;
 }
 
-function pad(n: number) {
-  return String(Math.max(0, n)).padStart(2, '0');
-}
-
-function useCountdown(endIso?: string) {
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(id);
-  }, []);
-
-  const end = endIso ? new Date(endIso).getTime() : Date.now() + 2 * 60 * 60 * 1000;
-  const diff = Math.max(0, end - now);
-  return {
-    days: Math.floor(diff / (1000 * 60 * 60 * 24)),
-    hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-    minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
-    seconds: Math.floor((diff % (1000 * 60)) / 1000),
-  };
-}
-
 /** Heavy Isaii maintenance UI — loaded on demand when maintenance is active. */
 export function MaintenanceScreen({
   status,
@@ -40,7 +19,6 @@ export function MaintenanceScreen({
 }: MaintenanceScreenProps) {
   const [logoFailed, setLogoFailed] = useState(false);
   const windowInfo = status.windows[0];
-  const countdown = useCountdown(windowInfo?.endTime);
 
   useEffect(() => {
     if (typeof document === 'undefined') return;
@@ -60,21 +38,88 @@ export function MaintenanceScreen({
 
   return (
     <div style={{ ...shell, ...style }} className={className} role="status" aria-live="polite">
+      <style>{`
+        @keyframes et-float-1 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          50% { transform: translate(40px, -40px) scale(1.1); }
+        }
+        @keyframes et-float-2 {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          50% { transform: translate(-30px, 30px) scale(0.95); }
+        }
+        @keyframes et-float-3 {
+          0%, 100% { transform: translate(-50%, -50%) scale(1); }
+          50% { transform: translate(-45%, -55%) scale(1.05); }
+        }
+        .et-orb-1 {
+          animation: et-float-1 20s infinite ease-in-out;
+        }
+        .et-orb-2 {
+          animation: et-float-2 25s infinite ease-in-out;
+        }
+        .et-orb-3 {
+          animation: et-float-3 18s infinite ease-in-out;
+        }
+        .et-card {
+          transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .et-card:hover {
+          border-color: rgba(255, 255, 255, 0.12) !important;
+          box-shadow: 0 35px 80px rgba(0, 0, 0, 0.7), 0 0 100px rgba(30, 136, 229, 0.08) !important;
+        }
+        .et-btn {
+          padding: 12px 26px;
+          border-radius: 12px;
+          font-weight: 600;
+          font-size: 14px;
+          text-decoration: none;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          cursor: pointer;
+          font-family: inherit;
+        }
+        .et-btn-primary {
+          background: linear-gradient(135deg, #D81B60 0%, #7C3AED 50%, #1E88E5 100%);
+          background-size: 200% auto;
+          color: #fff;
+          border: none;
+          box-shadow: 0 4px 20px rgba(124, 58, 237, 0.25);
+        }
+        .et-btn-primary:hover {
+          background-position: right center;
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(124, 58, 237, 0.45);
+        }
+        .et-btn-secondary {
+          background: rgba(255, 255, 255, 0.04);
+          color: #E2E8F0;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .et-btn-secondary:hover {
+          background: rgba(255, 255, 255, 0.08);
+          border-color: rgba(255, 255, 255, 0.2);
+          color: #fff;
+          transform: translateY(-2px);
+        }
+      `}</style>
+
       <div style={bgLayer} aria-hidden>
-        <div style={{ ...orb, ...orbMagenta }} />
-        <div style={{ ...orb, ...orbBlue }} />
-        <div style={{ ...orb, ...orbCyan }} />
+        <div className="et-orb-1" style={{ ...orb, ...orbMagenta }} />
+        <div className="et-orb-2" style={{ ...orb, ...orbBlue }} />
+        <div className="et-orb-3" style={{ ...orb, ...orbCyan }} />
         <div style={gridOverlay} />
       </div>
 
-      <div style={content}>
+      <div className="et-card" style={card}>
         <div style={logoWrap}>
           {!logoFailed ? (
             <img
               src={logoSrc}
               alt={brandName}
-              width={112}
-              height={112}
+              width={96}
+              height={96}
               style={logoImg}
               loading="lazy"
               decoding="async"
@@ -91,7 +136,7 @@ export function MaintenanceScreen({
         <div style={badge}>Platform upgrade in progress</div>
 
         <h1 style={headline}>
-          We are under <span style={gradientText}>Maintenance</span>
+          The system is under <span style={gradientText}>Maintenance</span>
         </h1>
 
         <p style={subcopy}>{description}</p>
@@ -105,18 +150,22 @@ export function MaintenanceScreen({
           </div>
         ) : null}
 
-        <div style={countdownRow}>
-          {[
-            { label: 'Days', value: countdown.days },
-            { label: 'Hours', value: countdown.hours },
-            { label: 'Minutes', value: countdown.minutes },
-            { label: 'Seconds', value: countdown.seconds },
-          ].map((t) => (
-            <div key={t.label} style={timeBox}>
-              <div style={timeValue}>{pad(t.value)}</div>
-              <div style={timeLabel}>{t.label}</div>
-            </div>
-          ))}
+        <div style={buttonsRow}>
+          <a href="mailto:support@isaii.in" className="et-btn et-btn-primary">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect width="20" height="16" x="2" y="4" rx="2"/>
+              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+            </svg>
+            Contact support
+          </a>
+          <a href="https://isaii.in" target="_blank" rel="noreferrer" className="et-btn et-btn-secondary">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+              <polyline points="15 3 21 3 21 9"/>
+              <line x1="10" y1="14" x2="21" y2="3"/>
+            </svg>
+            Visit Website
+          </a>
         </div>
 
         <div style={footer}>
@@ -157,7 +206,8 @@ const orb: CSSProperties = {
   position: 'absolute',
   borderRadius: '50%',
   filter: 'blur(100px)',
-  opacity: 0.55,
+  opacity: 0.5,
+  transition: 'all 1s ease',
 };
 
 const orbMagenta: CSSProperties = {
@@ -196,28 +246,39 @@ const gridOverlay: CSSProperties = {
   WebkitMaskImage: 'radial-gradient(circle at center, black 35%, transparent 90%)',
 };
 
-const content: CSSProperties = {
+const card: CSSProperties = {
   position: 'relative',
   zIndex: 2,
   width: '100%',
-  maxWidth: 760,
+  maxWidth: 680,
+  padding: 'clamp(32px, 6vw, 56px) clamp(24px, 5vw, 48px)',
+  borderRadius: 28,
+  background: 'rgba(255, 255, 255, 0.03)',
+  border: '1px solid rgba(255, 255, 255, 0.08)',
+  backdropFilter: 'blur(20px)',
+  WebkitBackdropFilter: 'blur(20px)',
+  boxShadow: '0 24px 60px rgba(0, 0, 0, 0.55), 0 0 80px rgba(216, 27, 96, 0.06)',
   textAlign: 'center',
+  boxSizing: 'border-box',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
 };
 
 const logoWrap: CSSProperties = {
   display: 'flex',
   justifyContent: 'center',
-  marginBottom: 22,
+  marginBottom: 20,
 };
 
 const logoImg: CSSProperties = {
-  width: 112,
-  height: 112,
+  width: 96,
+  height: 96,
   objectFit: 'contain',
-  borderRadius: 24,
+  borderRadius: 22,
   background: '#fff',
   padding: 10,
-  boxShadow: '0 0 48px rgba(30,136,229,.4)',
+  boxShadow: '0 0 40px rgba(30,136,229,.35)',
 };
 
 const logoFallback: CSSProperties = {
@@ -248,19 +309,19 @@ const badge: CSSProperties = {
   display: 'inline-block',
   padding: '8px 16px',
   borderRadius: 50,
-  background: 'rgba(216,27,96,.16)',
-  border: '1px solid rgba(216,27,96,.32)',
+  background: 'rgba(216, 27, 96, 0.16)',
+  border: '1px solid rgba(216, 27, 96, 0.32)',
   color: '#F9A8D4',
   fontSize: 13,
   letterSpacing: 0.4,
-  marginBottom: 18,
+  marginBottom: 20,
 };
 
 const headline: CSSProperties = {
   fontFamily: '"Space Grotesk", sans-serif',
-  fontSize: 'clamp(34px, 7vw, 58px)',
-  lineHeight: 1.08,
-  margin: '0 0 18px',
+  fontSize: 'clamp(28px, 6vw, 46px)',
+  lineHeight: 1.15,
+  margin: '0 0 16px 0',
   fontWeight: 700,
   letterSpacing: '-0.02em',
 };
@@ -274,10 +335,10 @@ const gradientText: CSSProperties = {
 
 const subcopy: CSSProperties = {
   color: '#B5B5C3',
-  fontSize: 'clamp(15px, 2.2vw, 18px)',
-  lineHeight: 1.75,
-  maxWidth: 620,
-  margin: '0 auto',
+  fontSize: 'clamp(14px, 2vw, 16px)',
+  lineHeight: 1.7,
+  maxWidth: 540,
+  margin: '0 auto 8px auto',
 };
 
 const metaRow: CSSProperties = {
@@ -285,51 +346,31 @@ const metaRow: CSSProperties = {
   justifyContent: 'center',
   gap: 8,
   flexWrap: 'wrap',
-  marginTop: 16,
+  marginTop: 12,
+  marginBottom: 8,
 };
 
 const metaPill: CSSProperties = {
   padding: '4px 10px',
   borderRadius: 999,
-  background: 'rgba(255,255,255,.06)',
-  border: '1px solid rgba(255,255,255,.1)',
+  background: 'rgba(255, 255, 255, 0.06)',
+  border: '1px solid rgba(255, 255, 255, 0.1)',
   fontSize: 12,
   color: '#CFCFD8',
   textTransform: 'capitalize',
 };
 
-const countdownRow: CSSProperties = {
+const buttonsRow: CSSProperties = {
   display: 'flex',
   justifyContent: 'center',
-  gap: 14,
-  margin: '40px 0 0',
+  gap: 16,
+  marginTop: 28,
   flexWrap: 'wrap',
 };
 
-const timeBox: CSSProperties = {
-  width: 104,
-  padding: '18px 12px',
-  borderRadius: 18,
-  background: 'rgba(255,255,255,.04)',
-  border: '1px solid rgba(255,255,255,.08)',
-};
-
-const timeValue: CSSProperties = {
-  fontFamily: '"Space Grotesk", sans-serif',
-  fontSize: 38,
-  fontWeight: 700,
-};
-
-const timeLabel: CSSProperties = {
-  fontSize: 11,
-  letterSpacing: 1,
-  textTransform: 'uppercase',
-  color: '#999',
-  marginTop: 4,
-};
-
 const footer: CSSProperties = {
-  marginTop: 48,
-  color: '#777',
-  fontSize: 13,
+  marginTop: 40,
+  color: '#666',
+  fontSize: 12,
+  letterSpacing: '0.05em',
 };

@@ -8,127 +8,305 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{
-  font-family:Inter,sans-serif;
-  background:#06060B;
-  overflow:hidden;
-  color:#fff;
-  min-height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  position:relative;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
-.bg{position:absolute;inset:0;overflow:hidden}
-.blur{position:absolute;border-radius:50%;filter:blur(100px);opacity:.55;animation:float 15s infinite ease-in-out}
-.blur:nth-child(1){width:420px;height:420px;background:#D81B60;top:-120px;left:-120px}
-.blur:nth-child(2){width:380px;height:380px;background:#1E88E5;right:-120px;bottom:-120px;animation-delay:3s}
-.blur:nth-child(3){width:280px;height:280px;background:#06B6D4;left:50%;top:60%;transform:translate(-50%,-50%);animation-delay:6s;opacity:.4}
-.grid{
-  position:absolute;inset:0;
-  background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);
-  background-size:40px 40px;
-  mask-image:radial-gradient(circle at center,black 35%,transparent 90%);
-  -webkit-mask-image:radial-gradient(circle at center,black 35%,transparent 90%);
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: #06060B;
+  color: #fff;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  padding: clamp(16px, 4vw, 40px);
 }
-.card{
-  position:relative;z-index:2;width:min(880px,92%);
-  padding:56px 48px 40px;border-radius:28px;
-  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);
-  backdrop-filter:blur(20px);
-  box-shadow:0 20px 60px rgba(0,0,0,.55),0 0 80px rgba(216,27,96,.12);
-  text-align:center;
+
+/* Background Layers & Animated Orbs */
+.bg-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
-.logo-wrap{display:flex;justify-content:center;margin-bottom:18px}
-.logo-wrap img{
-  width:96px;height:96px;object-fit:contain;border-radius:22px;
-  background:#fff;padding:10px;
-  box-shadow:0 0 40px rgba(30,136,229,.35);
+
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.5;
+  transition: all 1s ease;
 }
-.badge{
-  display:inline-block;padding:8px 16px;border-radius:50px;
-  background:rgba(216,27,96,.16);border:1px solid rgba(216,27,96,.32);
-  color:#F9A8D4;font-size:13px;letter-spacing:.4px;margin-bottom:16px;
+
+.orb-magenta {
+  width: 480px;
+  height: 480px;
+  background: #D81B60;
+  top: -140px;
+  left: -140px;
+  animation: et-float-1 20s infinite ease-in-out;
 }
-h1{font-family:"Space Grotesk",sans-serif;font-size:clamp(34px,6vw,54px);line-height:1.08;margin-bottom:18px;letter-spacing:-.02em}
-.gradient{
-  background:linear-gradient(90deg,#D81B60,#7C3AED,#1E88E5,#22D3EE);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+
+.orb-blue {
+  width: 440px;
+  height: 440px;
+  background: #1E88E5;
+  right: -140px;
+  bottom: -140px;
+  animation: et-float-2 25s infinite ease-in-out;
 }
-p{color:#B5B5C3;font-size:17px;line-height:1.8;max-width:640px;margin:0 auto}
-.countdown{display:flex;justify-content:center;gap:16px;margin:42px 0 28px;flex-wrap:wrap}
-.time{
-  width:110px;padding:18px 12px;border-radius:20px;
-  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+
+.orb-cyan {
+  width: 320px;
+  height: 320px;
+  background: #06B6D4;
+  left: 50%;
+  top: 62%;
+  transform: translate(-50%, -50%);
+  opacity: 0.4;
+  animation: et-float-3 18s infinite ease-in-out;
 }
-.time h2{font-size:40px;font-family:"Space Grotesk",sans-serif}
-.time span{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:#999}
-.buttons{display:flex;justify-content:center;gap:14px;flex-wrap:wrap}
-.btn{
-  padding:14px 30px;border-radius:14px;font-weight:600;text-decoration:none;
-  transition:.3s;border:none;cursor:pointer;font-size:14px;font-family:inherit;display:inline-block;
+
+.grid-overlay {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(circle at center, black 35%, transparent 90%);
+  -webkit-mask-image: radial-gradient(circle at center, black 35%, transparent 90%);
 }
-.primary{
-  background:linear-gradient(135deg,#D81B60,#7C3AED,#1E88E5);color:#fff;
-  box-shadow:0 0 32px rgba(124,58,237,.4);
+
+@keyframes et-float-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(40px, -40px) scale(1.1); }
 }
-.primary:hover{transform:translateY(-3px)}
-.secondary{border:1px solid rgba(255,255,255,.15);color:#fff;background:rgba(255,255,255,.05)}
-.secondary:hover{background:rgba(255,255,255,.09)}
-.footer{margin-top:44px;color:#777;font-size:13px}
-.footer a{color:#A5B4FC;text-decoration:none}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(28px)}}
-@media(max-width:768px){
-  .card{padding:36px 22px}
-  .time{width:78px}.time h2{font-size:28px}
+
+@keyframes et-float-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-30px, 30px) scale(0.95); }
+}
+
+@keyframes et-float-3 {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-45%, -55%) scale(1.05); }
+}
+
+/* Glassmorphic Card Container */
+.et-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 680px;
+  padding: clamp(32px, 6vw, 56px) clamp(24px, 5vw, 48px);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 80px rgba(216, 27, 96, 0.06);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.et-card:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 35px 80px rgba(0, 0, 0, 0.7), 0 0 100px rgba(30, 136, 229, 0.08);
+}
+
+/* Logo wrapper */
+.logo-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.logo-wrap img {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  border-radius: 22px;
+  background: #fff;
+  padding: 10px;
+  box-shadow: 0 0 40px rgba(30, 136, 229, 0.35);
+}
+
+/* Badge overlay */
+.badge {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 50px;
+  background: rgba(216, 27, 96, 0.16);
+  border: 1px solid rgba(216, 27, 96, 0.32);
+  color: #F9A8D4;
+  font-size: 13px;
+  letter-spacing: 0.4px;
+  margin-bottom: 20px;
+}
+
+/* Typography styles */
+h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(28px, 6vw, 46px);
+  line-height: 1.15;
+  margin: 0 0 16px 0;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.gradient {
+  background: linear-gradient(90deg, #D81B60, #7C3AED, #1E88E5, #22D3EE);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+p {
+  color: #B5B5C3;
+  font-size: clamp(14px, 2vw, 16px);
+  line-height: 1.7;
+  max-width: 540px;
+  margin: 0 auto 8px auto;
+}
+
+/* Meta Pills info */
+.meta-row {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  margin-bottom: 8px;
+}
+
+.meta-pill {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 12px;
+  color: #CFCFD8;
+  text-transform: capitalize;
+}
+
+/* Action buttons */
+.buttons-row {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 28px;
+  flex-wrap: wrap;
+}
+
+.et-btn {
+  padding: 12px 26px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.et-btn-primary {
+  background: linear-gradient(135deg, #D81B60 0%, #7C3AED 50%, #1E88E5 100%);
+  background-size: 200% auto;
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.25);
+}
+
+.et-btn-primary:hover {
+  background-position: right center;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(124, 58, 237, 0.45);
+}
+
+.et-btn-secondary {
+  background: rgba(255, 255, 255, 0.04);
+  color: #E2E8F0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.et-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+/* Footer credits */
+.footer {
+  margin-top: 40px;
+  color: #666;
+  font-size: 12px;
+  letter-spacing: 0.05em;
 }
 </style>
 </head>
 <body>
-<div class="bg">
-  <div class="blur"></div>
-  <div class="blur"></div>
-  <div class="blur"></div>
-  <div class="grid"></div>
+
+<div class="bg-layer" aria-hidden="true">
+  <div class="orb orb-magenta"></div>
+  <div class="orb orb-blue"></div>
+  <div class="orb orb-cyan"></div>
+  <div class="grid-overlay"></div>
 </div>
 
-<div class="card">
+<div class="et-card">
   <div class="logo-wrap">
     <img src="apps/asserts/image.png" alt="Isaii AI" width="96" height="96">
   </div>
+
   <div class="badge">Platform upgrade in progress</div>
-  <h1>We are under <span class="gradient">Maintenance</span></h1>
+
+  <h1>The system is under <span class="gradient">Maintenance</span></h1>
+
   <p>
-    Our engineers are deploying major improvements for a faster, smarter experience.
-    We’ll be back online shortly. Thank you for your patience.
+    Our engineers are deploying improvements for a faster, smarter experience. 
+    We’ll be back online shortly — thank you for your patience.
   </p>
-  <div class="countdown">
-    <div class="time"><h2 id="days">00</h2><span>Days</span></div>
-    <div class="time"><h2 id="hours">00</h2><span>Hours</span></div>
-    <div class="time"><h2 id="minutes">00</h2><span>Minutes</span></div>
-    <div class="time"><h2 id="seconds">00</h2><span>Seconds</span></div>
+
+  <div class="meta-row">
+    <span class="meta-pill">Scheduled Upgrade</span>
+    <span class="meta-pill">Severity · Low</span>
   </div>
-  <div class="buttons">
-    <a href="mailto:support@isaii.in" class="btn primary">Connect with customer support</a>
-    <a href="https://isaii.in/" class="btn secondary" target="_blank" rel="noreferrer">Visit isaii.in</a>
+
+  <div class="buttons-row">
+    <a href="mailto:support@isaii.in" class="et-btn et-btn-primary">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect width="20" height="16" x="2" y="4" rx="2"/>
+        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+      </svg>
+      Contact support
+    </a>
+    <a href="https://isaii.in" target="_blank" rel="noreferrer" class="et-btn et-btn-secondary">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+        <polyline points="15 3 21 3 21 9"/>
+        <line x1="10" y1="14" x2="21" y2="3"/>
+      </svg>
+      Visit Website
+    </a>
   </div>
-  <div class="footer">© 2026 Isaii AI · <a href="https://isaii.in/" target="_blank" rel="noreferrer">isaii.in</a></div>
+
+  <div class="footer">
+    © 2026 Isaii AI · isaii.in
+  </div>
 </div>
 
-<script>
-const end = Date.now() + 2 * 60 * 60 * 1000;
-setInterval(() => {
-  const diff = Math.max(0, end - Date.now());
-  const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-  const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  const s = Math.floor((diff % (1000 * 60)) / 1000);
-  document.getElementById('days').textContent = String(d).padStart(2, '0');
-  document.getElementById('hours').textContent = String(h).padStart(2, '0');
-  document.getElementById('minutes').textContent = String(m).padStart(2, '0');
-  document.getElementById('seconds').textContent = String(s).padStart(2, '0');
-}, 1000);
-</script>
 </body>
 </html>
